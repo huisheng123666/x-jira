@@ -15,6 +15,7 @@ export function cleanObject(object: any) {
 export const useMount = (callback: () => void) => {
     useEffect(() => {
         callback()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 }
 
@@ -33,11 +34,13 @@ export const useMount = (callback: () => void) => {
 export const useDebounce = <V>(value: V, delay: number = 0) => {
     const [debouncedValue, setdebouncedValue] = useState(value)
 
-    useEffect(() => {
+    useEffect(() => {        
         const timeout = setTimeout(() => {
             setdebouncedValue(value)
         }, delay)
-        return () => clearTimeout(timeout)
+        return () => {
+            clearTimeout(timeout)
+        }
     }, [value, delay])
 
     return debouncedValue
