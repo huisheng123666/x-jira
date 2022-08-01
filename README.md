@@ -15,3 +15,26 @@ type Partial<T> = {
 
 ### keyof Type
 将类型的属性取出 
+
+
+### 闭包的坑
+```
+const test = () => {
+    let num = 0
+    const effect = () => {
+        num += 1
+        const message = `现在的num值是：${num}`
+        return function unMount() {
+            console.log(message)
+        }
+    }
+
+    return effect
+} 
+
+const add = test()
+const unmount = add() // message在unmount闭包只改变了一次
+add()
+add()
+unmount() // 打印1
+```

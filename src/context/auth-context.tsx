@@ -1,9 +1,12 @@
-import React, { ReactNode, useState } from "react"
+import React, { ReactNode } from "react"
 import { User } from "@/screens/project-list/search-pannel"
 import * as auth from '@/auth-provider'
 import { useContext } from "react"
 import { http } from "@/utils/http"
 import { useMount } from "@/utils"
+import { useAsync } from "@/utils/use-async"
+import { FullPageError, FullPageLoading } from "@/components/lib"
+import { DevTools } from "jira-dev-tool"
 
 interface AuthForm {
     username: string
@@ -33,15 +36,27 @@ const AuthContext = React.createContext<{
 AuthContext.displayName = 'AuthContext'
 
 export const AuthProvider = ({ children }: {children: ReactNode}) => {
-    const [user, setUser] = useState<User | null>(null)
+
+    const { run, isLoading, isIdle, isError, error,  data: user, setData: setUser } = useAsync<User | null>()
 
     const login = (form: AuthForm) => auth.login(form).then(setUser)
     const register = (form: AuthForm) => auth.register(form).then(setUser)
     const logout = () => auth.logout().then(() => setUser(null))
 
     useMount(() => {
-        bootstrapUser().then(setUser)
+        run(bootstrapUser())
     })
+
+    if (isIdle || isLoading) {
+        return <FullPageLoading/>
+    }
+
+    if (isError) {
+        return <>
+            <FullPageError error={error!}/>
+            <DevTools/>
+        </>
+    }
 
     return <AuthContext.Provider children={children} value={{ user, login, register, logout }} />
 }

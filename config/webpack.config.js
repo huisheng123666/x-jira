@@ -188,6 +188,7 @@ module.exports = function (webpackEnv) {
   };
 
   return {
+    ignoreWarnings: [/Failed to parse source map/],
     target: ['browserslist'],
     // Webpack noise constrained to errors and warnings
     stats: 'errors-warnings',

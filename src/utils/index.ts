@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+
+export const isVoid = (value: unknown) => value === null || value === '' || value === undefined
 
 export function cleanObject(object: any) {
     const result = {...object}
     Object.keys(result).forEach(key => {
         const value = result[key]
-        if (value === null || value === '' || value === undefined) {
+        if (isVoid(value)) {
             delete result[key]
         }
     })
@@ -37,7 +39,7 @@ export const useDebounce = <V>(value: V, delay: number = 0) => {
     useEffect(() => {        
         const timeout = setTimeout(() => {
             setdebouncedValue(value)
-        }, delay)
+        }, delay) 
         return () => {
             clearTimeout(timeout)
         }
@@ -45,3 +47,19 @@ export const useDebounce = <V>(value: V, delay: number = 0) => {
 
     return debouncedValue
 }
+
+// 第三方库：react-helmet
+export const useDocumentTitle = (title: string, keepOnUnmount = true) => {
+    const oldTitle = useRef(document.title).current
+
+    useEffect(() => {
+        document.title = title
+        return () => {
+            if (!keepOnUnmount) {
+                document.title = oldTitle
+            }
+        }
+    }, [title, keepOnUnmount, oldTitle])
+}
+
+export const resetRoute = () => window.location.href = window.location.origin

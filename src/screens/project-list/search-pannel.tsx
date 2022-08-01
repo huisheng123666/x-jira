@@ -1,5 +1,5 @@
 import { Form, Input, Select } from "antd";
-import React, { useEffect, FC } from "react";
+import React, { FC } from "react";
 
 export interface User {
     id: string
@@ -20,19 +20,19 @@ interface SearchPanelPros {
 }
 
 export const SearchPanel: FC<SearchPanelPros> = ({ users, param, setParam }) => {
-
-    useEffect(() => {
-
-    }, [])
-
-    return <Form layout="inline">
+    return <Form layout="inline" style={{marginBottom: '2rem'}}>
         <Form.Item>
-            <Input type="text" value={param.name} onChange={evt => {
-                setParam({
-                    ...param,
-                    name: evt.target.value
-                })
-            }} />
+            <Input
+                type="text"
+                value={param.name}
+                placeholder="项目名"
+                onChange={evt => {
+                    setParam({
+                        ...param,
+                        name: evt.target.value
+                    })
+                }}
+            />
         </Form.Item>
         <Form.Item>
             <Select value={param.personId} onChange={value => {

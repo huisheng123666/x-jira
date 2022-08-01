@@ -1,28 +1,34 @@
-import { Card, Divider } from "antd";
 import React, { useState } from "react";
+import { Button, Card, Divider, Typography } from "antd";
 import { LoginScreen } from "./login";
 import { RegisterScreen } from "./register";
 import styled from '@emotion/styled'
 import Logo from '@/assets/logo.svg'
 import Left from '@/assets/left.svg'
 import Right from '@/assets/right.svg'
-
+ 
  export const UnauthenticatedApp = () => {
-    const [isRegister, setIsRegister] = useState(false)
-    return <Container>
-        <Header/>
-        <ShadowCard>
-            <Title>{isRegister ? '请注册' : '请登录'}</Title>
-            {
-                isRegister ?  <RegisterScreen/> : <LoginScreen/>
-            }
-            <Divider/>
-            <a onClick={() => setIsRegister(!isRegister)}>
-                {!isRegister ? '没有账号？注册新账号' : '已经有账号了？直接登录'}
-            </a>
-        </ShadowCard>
-        <Background/>
-    </Container>
+   // useDocumentTitle('登录/注册')
+
+   const [isRegister, setIsRegister] = useState(false)
+
+   const [error, setError] = useState<null | Error>(null)
+
+   return <Container>
+      <Header/>
+      <ShadowCard>
+         <Title>{isRegister ? '请注册' : '请登录'}</Title>
+         {error ? <Typography.Text type="danger">{error.message}</Typography.Text> : null}
+         {
+               isRegister ?  <RegisterScreen onError={setError} /> : <LoginScreen onError={setError} />
+         }
+         <Divider/>
+         <Button type="link" onClick={() => setIsRegister(!isRegister)}>
+               {!isRegister ? '没有账号？注册新账号' : '已经有账号了？直接登录'}
+         </Button>
+      </ShadowCard>
+      <Background/>
+   </Container>
  }
 
  const Title = styled.h2`
