@@ -38,3 +38,28 @@ add()
 add()
 unmount() // 打印1
 ```
+
+
+### as const
+将数组多种混合类型转换为tuple，每一项类型都确定
+```
+// <K extends string>(keys: K[]) 和 {[key in K]: string}组合后返回确定key、value类型
+// 如传入['name', 'age']返回{name: string, age: string}
+export const useUrlQueryQueryParam = <K extends string>(keys: K[]) => {
+    const [searchParams, setSearchParam] = useSearchParams()
+
+    return [
+        keys.reduce((prev, key) => {
+            return {
+              ...prev,
+              [key]: searchParams.get(key) || ''
+            }  
+        }, {} as {[key in K]: string}),
+        setSearchParam
+    ] as const
+}
+```
+
+
+### Object.fromEntries
+将iterator转换为对象
