@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react"
+import { useMountedRef } from "."
 
 interface State<D> {
     error: Error | null
@@ -28,6 +29,10 @@ export const useAsync = <D>(initialState?: State<D>, initialConfig?: typeof defa
         ...initialState
     })
 
+    const mountedRef = useMountedRef()
+
+    const [retry, setRetry] = useState(() => () => {})
+
     const setData = useCallback((data: D) => setState({
         data,
         stat: 'success',
@@ -40,10 +45,15 @@ export const useAsync = <D>(initialState?: State<D>, initialConfig?: typeof defa
         stat: 'error'
     }), [])
 
-    const run = useCallback((promise: Promise<D>) => {
+    const run = useCallback((promise: Promise<D>, runConfig?: { retry: () => Promise<D> }) => {
         if (!promise || !promise.then) {
             throw new Error('请传入Promise数据')
         }
+        setRetry(() => () => {
+            if (runConfig?.retry) {
+                run(runConfig?.retry(), runConfig)
+            }
+        })
         setState((prevState) => {
             return {
                 ...prevState,
@@ -53,17 +63,21 @@ export const useAsync = <D>(initialState?: State<D>, initialConfig?: typeof defa
         })
         return promise
         .then(data => {
-            setData(data)
+            if (mountedRef.current) {
+                setData(data)
+            }
             return data
-        })
+        })    
         .catch((error) => {
-            setError(error)
+            if (mountedRef.current) {
+                setError(error)
+            }
             if (config.throwOnError) {
                 return Promise.reject(error)                
-            }
+            } 
             return error
         })
-    }, [setData, setError, config])
+    }, [setData, setError, config, mountedRef])
 
     return {
         isIdle: state.stat === 'idle',
@@ -73,6 +87,7 @@ export const useAsync = <D>(initialState?: State<D>, initialConfig?: typeof defa
         run,
         setData,
         setError,
+        retry,
         ...state
     }
 }

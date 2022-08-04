@@ -13,7 +13,7 @@ export const ProjectList = () => {
 
     const [param, setParam] = useProjectParams()
 
-    const { isLoading, error, data: list } = useProjects(useDebounce(param, 200))
+    const { isLoading, error, data: list, retry } = useProjects(useDebounce(param, 200))
 
     const { data: users } = useUsers()
  
@@ -22,7 +22,7 @@ export const ProjectList = () => {
         <h1>项目列表</h1>
         <SearchPanel users={users || []} param={param} setParam={setParam} />
         {error ? <Typography.Text type="danger">{error?.message}</Typography.Text> : null}
-        <List dataSource={list || []} users={users || []} loading={isLoading} / >
+        <List refresh={retry} dataSource={list || []} users={users || []} loading={isLoading} / >
     </Container>
 }
 
