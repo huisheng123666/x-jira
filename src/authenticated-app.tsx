@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Dropdown, Menu } from "antd";
 import { useAuth } from "./context/auth-context";
 import { ProjectList } from "./screens/project-list";
@@ -9,9 +9,14 @@ import { Navigate, Route, Routes } from 'react-router'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { ProjectScreen } from "./screens/project";
 import { resetRoute } from "./utils";
+import { ProjectModal } from "./screens/project-list/project-modal";
+import { ProjectPopover } from "./components/project-popover";
 
 
-export const AuthenticatedApp = () => {    
+export const AuthenticatedApp = () => {
+
+    const [projectModalOpen, setProjectModalOpen] = useState(false)
+
     return <Container>
         <PageHeader />
         <Main>
@@ -22,37 +27,43 @@ export const AuthenticatedApp = () => {
                     <Route path="*" element={<Navigate to={'/projects'} />} />
                 </Routes>
             </Router>
-        </Main> 
+        </Main>
+        <ProjectModal
+            projectModalOpen={projectModalOpen}
+            onClose={() => setProjectModalOpen(false)}
+        />
     </Container>
 }
 
-
 const PageHeader = () => {
-    const { logout, user } = useAuth()
-
-
     return <Header between>
         <HeaderLeft gap={true}>
             <SoftwareLogo style={{cursor: 'pointer'}} onClick={resetRoute} width="18rem" color="rgb(38, 132, 255)" />
-            <h3>项目</h3>
-            <h3>用户</h3>
+            <ProjectPopover/>
+            <span>用户</span>
         </HeaderLeft>
         <HeaderRight>
-            <Dropdown
-                arrow
-                overlay={<Menu
-                    items={[
-                        {
-                            key: 'logout',
-                            label: <Button type="link" size="small" onClick={logout}>登出</Button>
-                        }
-                    ]}
-                />}
-            >
-                <Button type="link">Hi, {user?.name}</Button>
-            </Dropdown>
+            <User/>
         </HeaderRight>
     </Header>
+}
+
+const User = () => {
+    const { logout, user } = useAuth()
+
+    return <Dropdown
+        arrow
+        overlay={<Menu
+            items={[
+                {
+                    key: 'logout',
+                    label: <Button type="link" size="small" onClick={logout}>登出</Button>
+                }
+            ]}
+        />}
+    >
+        <Button type="link">Hi, {user?.name}</Button>
+    </Dropdown>
 }
 
 
