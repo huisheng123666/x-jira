@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import { Pin } from "@/components/pin";
 import { useEditProject } from "@/utils/use-projects";
 import { ButtonNoPadding } from "@/components/lib";
+import { useDispatch } from "react-redux";
+import { projectListActions } from "./project-list.slice";
 
 export interface Project {
      id: number
@@ -22,6 +24,8 @@ interface ListProps extends TableProps<Project> {
 }
 
 export const List: FC<ListProps> = ({ users, refresh, ...props }) => {
+    const dispatch = useDispatch()
+
     const {mutate} = useEditProject()
     const pinProject = (id: number) => (pin: boolean) => mutate({ id, pin }).then(refresh)
 
@@ -65,7 +69,7 @@ export const List: FC<ListProps> = ({ users, refresh, ...props }) => {
                             items={[
                                 {
                                     key: 'edit',
-                                    label: <ButtonNoPadding type='link'>编辑</ButtonNoPadding>
+                                    label: <ButtonNoPadding onClick={() => dispatch(projectListActions.openProjectModal())} type='link'>编辑</ButtonNoPadding>
                                 },
                                 {
                                     key: 'delete',

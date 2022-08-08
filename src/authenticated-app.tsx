@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button, Dropdown, Menu } from "antd";
 import { useAuth } from "./context/auth-context";
 import { ProjectList } from "./screens/project-list";
@@ -12,11 +12,7 @@ import { resetRoute } from "./utils";
 import { ProjectModal } from "./screens/project-list/project-modal";
 import { ProjectPopover } from "./components/project-popover";
 
-
 export const AuthenticatedApp = () => {
-
-    const [projectModalOpen, setProjectModalOpen] = useState(false)
-
     return <Container>
         <PageHeader />
         <Main>
@@ -28,10 +24,7 @@ export const AuthenticatedApp = () => {
                 </Routes>
             </Router>
         </Main>
-        <ProjectModal
-            projectModalOpen={projectModalOpen}
-            onClose={() => setProjectModalOpen(false)}
-        />
+        <ProjectModal/>
     </Container>
 }
 

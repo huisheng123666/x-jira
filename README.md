@@ -121,3 +121,15 @@ const CounterComponent = () => {
 
 ### 为什么需要redux-thunk，而不是在组件里处理异步任务
 组件总不需要关心异步的细节，只关心需要操作的步骤
+
+### 为什么redux-toolkit可以直接修改state属性，redux对比state是直接使用“newState===oldState”来判断是否更新
+immerjs https://immerjs.github.io/immer/    
+immerjs在执行前已经创建了一个新的对象，所以可以直接修改  
+```
+import produce from "immer"
+
+const nextState = produce(baseState, draft => {
+    draft[1].done = true
+    draft.push({title: "Tweet about it"})
+})
+```

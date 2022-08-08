@@ -13,8 +13,8 @@ const root = ReactDOM.createRoot(
 loadServer(() => {
   root.render(
     <AppProviders>
-        <App />
-        <DevTools/>
+      <App />
+      <DevTools/>
     </AppProviders>
   );
 })
