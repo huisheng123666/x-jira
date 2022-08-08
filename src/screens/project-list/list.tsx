@@ -1,21 +1,13 @@
 import React, { FC } from "react";
-import { Dropdown, Menu, Table, TableProps } from "antd";
-import { User } from "./search-pannel";
+import { Dropdown, Menu, Modal, Table, TableProps } from "antd";
 import dayjs from 'dayjs'
 import { Link } from "react-router-dom";
 import { Pin } from "@/components/pin";
-import { useEditProject } from "@/utils/use-projects";
+import { useDeleteProject, useEditProject } from "@/utils/use-projects";
 import { ButtonNoPadding } from "@/components/lib";
-import { useProjectModal } from "./util";
-
-export interface Project {
-     id: number
-     name: string
-     personId: number
-     pin: boolean
-     organization: string
-     created: number
-}
+import { useProjectModal, useProjectsQueryKey } from "./util";
+import { Project } from "@/types/project";
+import { User } from "@/types/user";
 
 interface ListProps extends TableProps<Project> {
     users: User[]
@@ -23,10 +15,23 @@ interface ListProps extends TableProps<Project> {
 }
 
 export const List: FC<ListProps> = ({ users, refresh, ...props }) => {
-    const {mutate} = useEditProject()
+    const {mutate} = useEditProject(useProjectsQueryKey())
     const pinProject = (id: number) => (pin: boolean) => mutate({ id, pin })
 
+    const { mutate: mutateDelete } = useDeleteProject(useProjectsQueryKey())
+
     const { startEdit } = useProjectModal()
+
+    const confirmDeleteProject = (id: number) => {
+        Modal.confirm({
+            title: '确认删除吗？',
+            content: '点击确定删除',
+            okText: '确定',
+            onOk() {
+                mutateDelete({id})
+            }
+        })
+    }
 
     return <Table rowKey={'id'} pagination={false} columns={[
         {
@@ -72,7 +77,7 @@ export const List: FC<ListProps> = ({ users, refresh, ...props }) => {
                                 },
                                 {
                                     key: 'delete',
-                                    label: <ButtonNoPadding type='link'>删除</ButtonNoPadding>
+                                    label: <ButtonNoPadding onClick={() => confirmDeleteProject(project.id)} type='link'>删除</ButtonNoPadding>
                                 },
                             ]}
                         />

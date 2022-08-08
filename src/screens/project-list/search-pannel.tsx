@@ -1,16 +1,8 @@
-import { UserSelect } from "@/components/user-select";
-import { Form, Input } from "antd";
 import React, { FC } from "react";
-import { Project } from "./list";
-
-export interface User {
-    id: number
-    name: string
-    email: string
-    title: string
-    organization: string
-    token: string
-}
+import { UserSelect } from "@/components/user-select";
+import { Project } from "@/types/project";
+import { Form, Input } from "antd";
+import { User } from "@/types/user";
  
 interface SearchPanelPros {
     users: User[]

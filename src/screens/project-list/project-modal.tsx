@@ -4,7 +4,7 @@ import { useAddProject, useEditProject } from "@/utils/use-projects"
 import styled from "@emotion/styled"
 import { Button, Drawer, Form, Input, Spin } from "antd"
 import { useEffect } from "react"
-import { useProjectModal } from "./util"
+import { useProjectModal, useProjectsQueryKey } from "./util"
 
 
 export const ProjectModal = () => {
@@ -12,7 +12,7 @@ export const ProjectModal = () => {
 
     const useMutateProject = editingProject ? useEditProject : useAddProject
 
-    const { mutateAsync, error, isLoading: mutateLoading } = useMutateProject()
+    const { mutateAsync, error, isLoading: mutateLoading } = useMutateProject(useProjectsQueryKey())
 
     const [form] = Form.useForm()
 

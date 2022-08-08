@@ -1,5 +1,4 @@
 import React, { ReactNode } from "react"
-import { User } from "@/screens/project-list/search-pannel"
 import * as auth from '@/auth-provider'
 import { useContext } from "react"
 import { http } from "@/utils/http"
@@ -7,6 +6,8 @@ import { useMount } from "@/utils"
 import { useAsync } from "@/utils/use-async"
 import { FullPageError, FullPageLoading } from "@/components/lib"
 import { DevTools } from "jira-dev-tool"
+import { useQueryClient } from "@tanstack/react-query"
+import { User } from "@/types/user"
 
 interface AuthForm {
     username: string
@@ -37,11 +38,17 @@ AuthContext.displayName = 'AuthContext'
 
 export const AuthProvider = ({ children }: {children: ReactNode}) => {
 
+    const queryClient = useQueryClient()
+
     const { run, isLoading, isIdle, isError, error,  data: user, setData: setUser } = useAsync<User | null>()
 
     const login = (form: AuthForm) => auth.login(form).then(setUser)
     const register = (form: AuthForm) => auth.register(form).then(setUser)
-    const logout = () => auth.logout().then(() => setUser(null))
+    const logout = () => auth.logout().then(() => {
+        setUser(null)
+        // 退出登录清空缓存数据
+        queryClient.clear()
+    })
 
     useMount(() => {
         run(bootstrapUser())
