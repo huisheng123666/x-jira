@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button, Dropdown, Menu } from "antd";
 import { useAuth } from "./context/auth-context";
 import { ProjectList } from "./screens/project-list";
@@ -14,24 +14,18 @@ import { ProjectPopover } from "./components/project-popover";
 
 
 export const AuthenticatedApp = () => {
-
-    const [projectModalOpen, setProjectModalOpen] = useState(false)
-
     return <Container>
-        <PageHeader />
-        <Main>
-            <Router>
+        <Router>
+            <PageHeader />
+            <Main>
                 <Routes>
                     <Route path="/projects" element={<ProjectList/>} />
                     <Route path="/projects/:projectId/*" element={<ProjectScreen/>} />
                     <Route path="*" element={<Navigate to={'/projects'} />} />
                 </Routes>
-            </Router>
-        </Main>
-        <ProjectModal
-            projectModalOpen={projectModalOpen}
-            onClose={() => setProjectModalOpen(false)}
-        />
+            </Main>
+            <ProjectModal/>
+        </Router>
     </Container>
 }
 

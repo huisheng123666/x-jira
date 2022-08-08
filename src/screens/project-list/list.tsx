@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Pin } from "@/components/pin";
 import { useEditProject } from "@/utils/use-projects";
 import { ButtonNoPadding } from "@/components/lib";
+import { useProjectModal } from "./util";
 
 export interface Project {
      id: number
@@ -18,12 +19,14 @@ export interface Project {
 
 interface ListProps extends TableProps<Project> {
     users: User[]
-    refresh: () => void
+    refresh?: () => void
 }
 
 export const List: FC<ListProps> = ({ users, refresh, ...props }) => {
     const {mutate} = useEditProject()
-    const pinProject = (id: number) => (pin: boolean) => mutate({ id, pin }).then(refresh)
+    const pinProject = (id: number) => (pin: boolean) => mutate({ id, pin })
+
+    const { startEdit } = useProjectModal()
 
     return <Table rowKey={'id'} pagination={false} columns={[
         {
@@ -36,7 +39,7 @@ export const List: FC<ListProps> = ({ users, refresh, ...props }) => {
             title: '名称',
             sorter: (a, b) => a.name.localeCompare(b.name),
             render(value, project) {
-                return <Link to={project.id.toString()}>{project.name}</Link>
+                return <Link to={project.id?.toString()}>{project.name}</Link>
             }
         },
         {
@@ -65,7 +68,7 @@ export const List: FC<ListProps> = ({ users, refresh, ...props }) => {
                             items={[
                                 {
                                     key: 'edit',
-                                    label: <ButtonNoPadding type='link'>编辑</ButtonNoPadding>
+                                    label: <ButtonNoPadding onClick={() => startEdit(project.id)} type='link'>编辑</ButtonNoPadding>
                                 },
                                 {
                                     key: 'delete',

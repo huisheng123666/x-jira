@@ -121,3 +121,13 @@ const CounterComponent = () => {
 
 ### 为什么需要redux-thunk，而不是在组件里处理异步任务
 组件总不需要关心异步的细节，只关心需要操作的步骤
+
+
+## 类型守卫 (value is Error 当value有message是就是Error类型)
+```
+const isError = (value: any): value is Error => value?.message
+```
+
+
+### 乐观更新（optimistic updates）
+在确认服务端返回之前改变UI，假装服务端处理成功，如果失败做状态回滚

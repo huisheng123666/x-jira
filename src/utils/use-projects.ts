@@ -1,53 +1,68 @@
 import { Project } from "@/screens/project-list/list";
-import { useCallback, useEffect } from "react";  
+import { useProjectParams } from "@/screens/project-list/util";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cleanObject } from ".";
 import { useHttp } from "./http";
-import { useAsync } from "./use-async";
 
 export const useProjects = (param?: Partial<Project>) => {
     const client = useHttp()
 
-    const { run, ...result } = useAsync<Project[]>()
-
-    const fetchProject = useCallback(() => client('projects', { data: cleanObject(param || {}) }), [client, param])
-
-    useEffect(() => {
-        run(fetchProject(), {
-            retry: fetchProject
-        })
-    }, [run, fetchProject])
-
-    return result
+    // 第一个key值，第二个需要观测的内容，param变化后做出更新
+    return useQuery<Project[]>(['projects', param], () => client('projects', {data: cleanObject(param || {})}))
 }
 
 export const useEditProject = () => {
-    const { run, ...asyncResult } = useAsync()
-    const client = useHttp()
-    const mutate = (params: Partial<Project>) => {
-        return run(client(`projects/${params.id}`, {
-            data: params,
-            method: 'PATCH'
-        }))
-    }
+    const client = useHttp() 
+    const queryClient = useQueryClient()
+    const [searchParams] = useProjectParams()
 
-    return {
-        mutate,
-        ...asyncResult
-    }
+    const queryKey = ['projects', searchParams]
+
+
+    return useMutation((params: Partial<Project>) => client(`projects/${params.id}`, {
+        method: 'PATCH',
+        data: params
+    }), {
+        // 成功后更新projects
+        onSuccess: () => queryClient.invalidateQueries(queryKey),
+        // 乐观更新
+        async onMutate(target) {
+            // 获取更新前的数据
+            const previousItems = queryClient.getQueriesData(queryKey)[1]
+            // 修改旧数据
+            queryClient.setQueryData(queryKey, (old?: Project[]) => {
+                return old?.map(project => project.id === target.id ? {...project, ...target} : project)
+            })
+            return {previousItems}
+        },
+        onError(error, newItem, context) {            
+            queryClient.setQueryData(queryKey, context?.previousItems)
+        }
+    })
 }
 
 export const useAddProject = () => {
-    const { run, ...asyncResult } = useAsync()
     const client = useHttp()
-    const mutate = (params: Partial<Project>) => {
-        return run(client(`projects/${params.id}`, {
+    const queryClient = useQueryClient()
+
+    return useMutation((params: Partial<Project>) => {
+        return client(`projects`, {
             data: params,
             method: 'POST'
-        }))
-    }
+        })
+    }, {
+        onSuccess: () => queryClient.invalidateQueries(['projects'])
+    })
+}
 
-    return {
-        mutate,
-        ...asyncResult
-    }
+export const useProject = (id?: number) => {
+    const client = useHttp()
+
+    return useQuery<Project | null>(
+        ['project', { id }],
+        () => client(`projects/${id}`),
+        {
+            enabled: !!id
+        }
+    )
 }
