@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useReducer, useState } from "react"
 import { useMountedRef } from "."
 
 interface State<D> {
@@ -17,6 +17,17 @@ const defaultConfig = {
     throwOnError: false
 }
 
+// 安全的dispatch，避免组件销毁异步任务继续dispatch
+const useSafeDispatch = <T>(dispatch: (...args: T[ ]) => void) => {
+    const mountedRef = useMountedRef()
+
+    return useCallback((...args: T[]) => {
+        if (mountedRef.current) {
+            dispatch(...args)
+        }
+    }, [dispatch, mountedRef])
+}
+
 export const useAsync = <D>(initialState?: State<D>, initialConfig?: typeof defaultConfig) => {
     const config = useMemo(() => {
         return {
@@ -24,26 +35,26 @@ export const useAsync = <D>(initialState?: State<D>, initialConfig?: typeof defa
             ...initialConfig
         }
     }, [initialConfig])
-    const [state, setState] = useState<State<D>>({
+    const [state, dispatch] = useReducer((state: State<D>, action: Partial<State<D>>) => ({...state, ...action}), {
         ...defaultInitialState,
         ...initialState
     })
 
-    const mountedRef = useMountedRef()
+    const safeDispatch = useSafeDispatch(dispatch)
 
     const [retry, setRetry] = useState(() => () => {})
 
-    const setData = useCallback((data: D) => setState({
+    const setData = useCallback((data: D) => safeDispatch({
         data,
         stat: 'success',
         error: null
-    }), [])
+    }), [safeDispatch])
 
-    const setError = useCallback((error: Error) => setState({
+    const setError = useCallback((error: Error) => safeDispatch({
         error,
         data: null,
         stat: 'error'
-    }), [])
+    }), [safeDispatch])
 
     const run = useCallback((promise: Promise<D>, runConfig?: { retry: () => Promise<D> }) => {
         if (!promise || !promise.then) {
@@ -54,30 +65,23 @@ export const useAsync = <D>(initialState?: State<D>, initialConfig?: typeof defa
                 run(runConfig?.retry(), runConfig)
             }
         })
-        setState((prevState) => {
-            return {
-                ...prevState,
-                stat: 'loading',
-                error: null
-            } 
-        })
+        safeDispatch({
+            stat: 'loading',
+            error: null
+        } )
         return promise
         .then(data => {
-            if (mountedRef.current) {
-                setData(data)
-            }
+            setData(data)
             return data
         })    
         .catch((error) => {
-            if (mountedRef.current) {
-                setError(error)
-            }
+            setError(error)
             if (config.throwOnError) {
                 return Promise.reject(error)                
             } 
             return error
         })
-    }, [setData, setError, config, mountedRef])
+    }, [setData, setError, config, safeDispatch])
 
     return {
         isIdle: state.stat === 'idle',
