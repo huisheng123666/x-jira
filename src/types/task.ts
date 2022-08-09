@@ -5,7 +5,7 @@ export interface Task {
   processorid: number
   projectId: number
   epicId: number
-  KanbanId: number
+  kanbanId: number
   // bug or task
   typeId: number
   note: string

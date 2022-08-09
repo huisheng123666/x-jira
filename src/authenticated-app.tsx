@@ -62,6 +62,7 @@ const User = () => {
 
 
 const Container = styled.div`
+    height: 100vh;
     display: grid;
     grid-template-rows: 6rem 1fr;
 `
@@ -77,4 +78,7 @@ const HeaderLeft = styled(Row)`
 
 const HeaderRight = styled.div``
 
-const Main = styled.main``
+const Main = styled.main`
+    display: flex;
+    overflow: hidden;
+`
